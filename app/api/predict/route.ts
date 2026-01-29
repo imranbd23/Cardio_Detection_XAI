@@ -226,14 +226,15 @@ function calculateHeartDiseaseRisk(data: FormData) {
     impact: dentalContribution > 0 ? "positive" : "neutral",
   })
 
-  // Normalize score to 0-100
-  riskScore = Math.max(0, Math.min(100, riskScore))
+  // Normalize score to 0-1 (percentage will be calculated in frontend)
+  const maxPossibleScore = 30 + 15 + 5 + 7 + 20 + 18 + 12 + 8 + 3 + 6 + 2 + 4 // Sum of max individual contributions
+  riskScore = Math.max(0, Math.min(1, riskScore / maxPossibleScore))
 
-  // Determine risk category
+  // Determine risk category (now using 0-1 scale)
   let risk: "Low" | "Moderate" | "High"
-  if (riskScore < 25) {
+  if (riskScore < 0.33) {
     risk = "Low"
-  } else if (riskScore < 55) {
+  } else if (riskScore < 0.67) {
     risk = "Moderate"
   } else {
     risk = "High"
@@ -251,11 +252,17 @@ function calculateHeartDiseaseRisk(data: FormData) {
   // Sort features by contribution magnitude
   const sortedFeatures = featureImportances.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution))
 
+  // Normalize feature contributions to 0-100 scale for visualization
+  const normalizedFeatures = sortedFeatures.map((feature) => ({
+    ...feature,
+    normalizedContribution: Math.round((feature.contribution / 30) * 100), // Max single contribution is ~30
+  }))
+
   return {
     risk,
-    score: Math.round(riskScore),
+    score: Math.round(riskScore * 100), // Return as 0-100
     factors: riskFactors.slice(0, 5),
-    features: sortedFeatures,
+    features: normalizedFeatures,
   }
 }
 

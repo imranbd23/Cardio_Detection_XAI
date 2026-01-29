@@ -1,12 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CheckCircle2, AlertTriangle, AlertCircle, TrendingUp, TrendingDown } from "lucide-react"
+import SHAPChart from "./shap-chart"
+import LIMEChart from "./lime-chart"
 
 interface FeatureImportance {
   name: string
   value: string | number
   contribution: number
   impact: "negative" | "positive" | "neutral"
+  normalizedContribution?: number
 }
 
 interface PredictionProps {
@@ -75,7 +78,7 @@ export default function PredictionResult({ prediction }: PredictionProps) {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">Risk Score</span>
-                <span className="text-2xl font-bold">{(prediction.score * 100).toFixed(1)}%</span>
+                <span className="text-2xl font-bold">{Math.min(100, prediction.score)}%</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
@@ -86,7 +89,7 @@ export default function PredictionResult({ prediction }: PredictionProps) {
                         ? "bg-yellow-600"
                         : "bg-red-600"
                   }`}
-                  style={{ width: `${prediction.score * 100}%` }}
+                  style={{ width: `${Math.min(100, prediction.score)}%` }}
                 />
               </div>
             </div>
@@ -115,10 +118,14 @@ export default function PredictionResult({ prediction }: PredictionProps) {
         </CardContent>
       </Card>
 
+      <SHAPChart features={prediction.features} />
+
+      <LIMEChart features={prediction.features} />
+
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Feature Importance (SHAP/LIME)</CardTitle>
-          <CardDescription>How each factor contributes to your risk score</CardDescription>
+          <CardTitle className="text-base">Detailed Feature Breakdown</CardTitle>
+          <CardDescription>Individual contribution of each health factor</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -149,7 +156,7 @@ export default function PredictionResult({ prediction }: PredictionProps) {
                             : "bg-gray-300"
                       }`}
                       style={{
-                        width: `${Math.min(100, Math.abs(feature.contribution) * 5)}%`,
+                        width: `${Math.min(100, Math.abs((feature.normalizedContribution || feature.contribution) * 3))}%`,
                       }}
                     />
                   </div>
