@@ -22,9 +22,6 @@ interface PredictionProps {
 }
 
 export default function PredictionResult({ prediction }: PredictionProps) {
-  console.log("[v0] Prediction data:", prediction)
-  console.log("[v0] Features:", prediction.features)
-
   const getRiskColor = (risk: string) => {
     switch (risk) {
       case "Low":
@@ -121,9 +118,10 @@ export default function PredictionResult({ prediction }: PredictionProps) {
         </CardContent>
       </Card>
 
-      <SHAPChart features={prediction.features} />
-
-      <LIMEChart features={prediction.features} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SHAPChart features={prediction.features} />
+        <LIMEChart features={prediction.features} />
+      </div>
 
       <Card>
         <CardHeader>
