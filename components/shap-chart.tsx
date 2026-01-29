@@ -1,12 +1,14 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface FeatureData {
   name: string
+  value: string | number
   contribution: number
-  normalizedContribution: number
+  impact: "negative" | "positive" | "neutral"
+  normalizedContribution?: number
 }
 
 interface SHAPChartProps {
@@ -17,7 +19,8 @@ export default function SHAPChart({ features }: SHAPChartProps) {
   // Get top 8 features for chart clarity
   const topFeatures = features.slice(0, 8).map((f) => ({
     name: f.name,
-    contribution: f.normalizedContribution,
+    contribution: Math.abs(f.contribution),
+    originalContribution: f.contribution,
     impact: f.contribution > 0 ? 'Risk Increasing' : f.contribution < 0 ? 'Protective' : 'Neutral',
   }))
 
@@ -28,7 +31,7 @@ export default function SHAPChart({ features }: SHAPChartProps) {
         <div className="bg-white p-3 border border-gray-200 rounded shadow-lg">
           <p className="font-semibold text-sm">{payload[0].payload.name}</p>
           <p className="text-sm text-gray-600">
-            Impact: {payload[0].value > 0 ? '+' : ''}{payload[0].value}%
+            Impact: {payload[0].payload.originalContribution > 0 ? '+' : ''}{payload[0].payload.originalContribution}
           </p>
           <p className="text-xs text-gray-500">{payload[0].payload.impact}</p>
         </div>
@@ -57,14 +60,14 @@ export default function SHAPChart({ features }: SHAPChartProps) {
               <XAxis type="number" />
               <YAxis dataKey="name" type="category" width={190} tick={{ fontSize: 12 }} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="contribution" name="Contribution Score" radius={[0, 8, 8, 0]}>
+              <Bar dataKey="contribution" name="SHAP Value" radius={[0, 8, 8, 0]}>
                 {topFeatures.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={
-                      entry.contribution > 0
+                      entry.originalContribution > 0
                         ? '#ef4444'
-                        : entry.contribution < 0
+                        : entry.originalContribution < 0
                           ? '#22c55e'
                           : '#9ca3af'
                     }

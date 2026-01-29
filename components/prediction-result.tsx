@@ -22,6 +22,9 @@ interface PredictionProps {
 }
 
 export default function PredictionResult({ prediction }: PredictionProps) {
+  console.log("[v0] Prediction data:", prediction)
+  console.log("[v0] Features:", prediction.features)
+
   const getRiskColor = (risk: string) => {
     switch (risk) {
       case "Low":

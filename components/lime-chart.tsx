@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface FeatureData {
   name: string
+  value: string | number
   contribution: number
-  normalizedContribution: number
+  impact: "negative" | "positive" | "neutral"
+  normalizedContribution?: number
 }
 
 interface LIMEChartProps {
@@ -19,8 +21,8 @@ export default function LIMEChart({ features }: LIMEChartProps) {
   // Calculate relative importance for pie chart
   const absoluteContributions = features.map((f) => ({
     name: f.name,
-    value: Math.abs(f.normalizedContribution),
-    originalValue: f.normalizedContribution,
+    value: Math.abs(f.contribution),
+    originalValue: f.contribution,
   }))
 
   const totalImportance = absoluteContributions.reduce((sum, f) => sum + f.value, 0)
